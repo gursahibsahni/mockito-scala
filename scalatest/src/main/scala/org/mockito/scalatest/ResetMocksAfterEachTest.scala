@@ -1,9 +1,9 @@
-package org.mockito.integrations.scalatest
+package org.mockito.scalatest
 
 import java.util.concurrent.ConcurrentHashMap
 
-import org.mockito.{MockCreator, MockitoSugar, MockSettings}
 import org.mockito.stubbing.DefaultAnswer
+import org.mockito.{MockCreator, MockSettings, MockitoSugar}
 import org.scalatest.{Outcome, TestSuite}
 
 import scala.collection.JavaConverters._
@@ -17,7 +17,6 @@ import scala.reflect.runtime.universe.WeakTypeTag
  * Just mix-in after your favourite suite, i.e. {{{class MyTest extends PlaySpec with MockitoSugar with ResetMocksAfterEachTest}}}
  *
  */
-@deprecated("Please use org.mockito.scalatest.ResetMocksAfterEachTest from the mockito-scala-scalatest module", "1.3.0")
 trait ResetMocksAfterEachTest extends TestSuite with MockCreator { self: MockCreator =>
 
   private val mocksToReset = ConcurrentHashMap.newKeySet[AnyRef]().asScala
