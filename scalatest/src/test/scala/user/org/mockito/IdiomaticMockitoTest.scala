@@ -1,9 +1,10 @@
 package user.org.mockito
 
+import org.mockito.Strictness
 import org.mockito.captor.ArgCaptor
 import org.mockito.exceptions.verification._
 import org.mockito.invocation.InvocationOnMock
-import org.mockito.scalatest.ScalatestMockito
+import org.mockito.scalatest.ScalatestAsyncMockito
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{AsyncWordSpec, FixtureContext, Matchers}
 import user.org.mockito.matchers.{ValueCaseClass, ValueClass}
@@ -11,7 +12,10 @@ import user.org.mockito.matchers.{ValueCaseClass, ValueClass}
 case class Bread(name: String) extends AnyVal
 case class Cheese(name: String)
 
-class IdiomaticMockitoTest extends AsyncWordSpec with Matchers with ScalatestMockito with TableDrivenPropertyChecks {
+class IdiomaticMockitoTest extends AsyncWordSpec with Matchers with ScalatestAsyncMockito with TableDrivenPropertyChecks {
+
+  override val strictness: Strictness = Strictness.Lenient
+
   val scenarios = Table(
     ("testDouble", "orgDouble", "foo"),
     ("mock", () => mock[Org], () => mock[Foo]),
