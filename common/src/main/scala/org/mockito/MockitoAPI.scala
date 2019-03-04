@@ -268,6 +268,12 @@ private[mockito] trait MockitoEnhancer extends MockCreator {
 
     Mockito.verifyNoMoreInteractions(mocks: _*)
   }
+
+  /**
+    * Creates a "spy" in a way that supports lambdas and anonymous classes as they don't work with the standard spy as
+    * they are created as final classes by the compiler
+    */
+  def spyLambda[T <: AnyRef: ClassTag](realObj: T): T = Mockito.mock(clazz, AdditionalAnswers.delegatesTo(realObj))
 }
 
 private[mockito] trait Verifications {
@@ -324,12 +330,6 @@ private[mockito] trait Verifications {
  * @author Bruno Bonanno
  */
 private[mockito] trait Rest extends MockitoEnhancer with DoSomething with Verifications {
-
-  /**
-   * Creates a "spy" in a way that supports lambdas and anonymous classes as they don't work with the standard spy as
-   * they are created as final classes by the compiler
-   */
-  def spyLambda[T <: AnyRef: ClassTag](realObj: T): T = Mockito.mock(clazz, AdditionalAnswers.delegatesTo(realObj))
 
   /**
    * Delegates to <code>Mockito.when()</code>, it's only here to expose the full Mockito API

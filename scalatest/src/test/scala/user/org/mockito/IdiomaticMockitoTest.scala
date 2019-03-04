@@ -3,15 +3,15 @@ package user.org.mockito
 import org.mockito.captor.ArgCaptor
 import org.mockito.exceptions.verification._
 import org.mockito.invocation.InvocationOnMock
-import org.mockito.{ArgumentMatchersSugar, IdiomaticMockito, MockitoSugar}
+import org.mockito.scalatest.ScalatestMockito
 import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{AsyncWordSpec, FixtureContext, Matchers}
 import user.org.mockito.matchers.{ValueCaseClass, ValueClass}
 
 case class Bread(name: String) extends AnyVal
 case class Cheese(name: String)
 
-class IdiomaticMockitoTest extends WordSpec with Matchers with IdiomaticMockito with ArgumentMatchersSugar with TableDrivenPropertyChecks {
+class IdiomaticMockitoTest extends AsyncWordSpec with Matchers with ScalatestMockito with TableDrivenPropertyChecks {
   val scenarios = Table(
     ("testDouble", "orgDouble", "foo"),
     ("mock", () => mock[Org], () => mock[Foo]),
@@ -207,7 +207,7 @@ class IdiomaticMockitoTest extends WordSpec with Matchers with IdiomaticMockito 
         val org = orgDouble()
       }
 
-      "check a mock was not used (with setup)" in new SetupNeverUsed {
+      "check a mock was not used (with setup)" in new SetupNeverUsed with FixtureContext {
         org wasNever called
 
         a[NoInteractionsWanted] should be thrownBy {
