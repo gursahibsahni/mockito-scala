@@ -26,7 +26,7 @@ class ScalaMockHandler[T](mockSettings: MockCreationSettings[T]) extends MockHan
             mockRef       <- i.mockRef
             realMethod    <- i.realMethod
             rawArguments = i.getRawArguments
-            arguments = if (rawArguments != null && rawArguments.nonEmpty)
+            arguments = if (rawArguments != null && rawArguments.nonEmpty && !isCallRealMethod)
               unwrapVarargs(mockitoMethod, unwrapByNameArgs(mockitoMethod, rawArguments.asInstanceOf[Array[Any]]))
                 .asInstanceOf[Array[AnyRef]]
             else rawArguments
@@ -47,6 +47,12 @@ object ScalaMockHandler {
     def mockRef: Option[MockReference[Object]] = readDeclaredField(i, "mockRef")
     def realMethod: Option[RealMethod]         = readDeclaredField(i, "realMethod")
   }
+
+  private def isCallRealMethod: Boolean =
+    (new Exception).getStackTrace.toList.exists { t =>
+      t.getClassName == "org.mockito.internal.handler.ScalaInvocation" &&
+      t.getMethodName == "callRealMethod"
+    }
 
   private def unwrapByNameArgs(method: MockitoMethod, args: Array[Any]): Array[Any] =
     Extractors
