@@ -3,8 +3,9 @@ import java.lang.reflect.Method
 
 import org.mockito.internal.exceptions.Reporter.cannotCallAbstractRealMethod
 import org.mockito.internal.exceptions.VerificationAwareInvocation
-import org.mockito.internal.invocation.{MockitoMethod, RealMethod}
 import org.mockito.internal.invocation.mockref.MockReference
+import org.mockito.internal.invocation.{MockitoMethod, RealMethod}
+import org.mockito.internal.reporting.PrintSettings
 import org.mockito.invocation.{Invocation, Location, StubInfo}
 
 class ScalaInvocation(val mockRef: MockReference[AnyRef],
@@ -51,4 +52,5 @@ class ScalaInvocation(val mockRef: MockReference[AnyRef],
     val state = Seq(super.hashCode(), mockRef.get, mockitoMethod, arguments)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
+  override def toString: String = new PrintSettings().print(this)
 }
