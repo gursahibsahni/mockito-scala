@@ -27,8 +27,7 @@ class ScalaMockHandler[T](mockSettings: MockCreationSettings[T]) extends MockHan
             realMethod    <- i.realMethod
             rawArguments = i.getRawArguments
             arguments = if (rawArguments != null && rawArguments.nonEmpty && !isCallRealMethod)
-              unwrapVarargs(mockitoMethod, unwrapByNameArgs(mockitoMethod, rawArguments.asInstanceOf[Array[Any]]))
-                .asInstanceOf[Array[AnyRef]]
+              unwrapArgs(mockitoMethod, rawArguments.asInstanceOf[Array[Any]])
             else rawArguments
           } yield new ScalaInvocation(mockRef, mockitoMethod, arguments, rawArguments, realMethod, i.getLocation, i.getSequenceNumber)
           scalaInvocation.getOrElse(invocation)
@@ -54,25 +53,30 @@ object ScalaMockHandler {
       t.getMethodName == "callRealMethod"
     }
 
-  private def unwrapByNameArgs(method: MockitoMethod, args: Array[Any]): Array[Any] =
+  private def unwrapArgs(method: MockitoMethod, args: Array[Any]): Array[Object] =
     Extractors
       .getOrDefault(method.getJavaMethod.getDeclaringClass, ArgumentExtractor.Empty)
       .transformArgs(method.getJavaMethod, args.asInstanceOf[Array[Any]])
+      .asInstanceOf[Array[Object]]
 
   val Extractors = new ConcurrentHashMap[Class[_], ArgumentExtractor]
 
   case class ArgumentExtractor(toTransform: Seq[(Method, Set[Int])]) {
-    def transformArgs(method: Method, args: Array[Any]): Array[Any] =
-      toTransform
+    def transformArgs(method: Method, args: Array[Any]): Array[Any] = {
+      val transformed = toTransform
         .find(_._1 === method)
         .map(_._2)
         .map { transformIndices =>
-          args.zipWithIndex.map {
-            case (arg: Function0[_], idx) if transformIndices.contains(idx) => arg()
-            case (arg, _)                                                   => arg
+          args.zipWithIndex.flatMap {
+            case (arg: Function0[_], idx) if transformIndices.contains(idx)   => List(arg())
+            case (arg: Traversable[_], idx) if transformIndices.contains(idx) => arg
+            case (arg, _)                                                     => List(arg)
           }
         }
         .getOrElse(args)
+
+      unwrapVarargs(transformed)
+    }
   }
 
   object ArgumentExtractor {
