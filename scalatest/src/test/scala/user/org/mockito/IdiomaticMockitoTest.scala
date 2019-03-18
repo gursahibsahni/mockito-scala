@@ -1,6 +1,6 @@
 package user.org.mockito
 
-import org.mockito.Strictness
+import org.mockito.{ MockitoSugar, Strictness }
 import org.mockito.captor.ArgCaptor
 import org.mockito.exceptions.verification._
 import org.mockito.invocation.InvocationOnMock
@@ -411,7 +411,6 @@ class IdiomaticMockitoTest extends AsyncWordSpec with Matchers with ScalatestAsy
         foo.fooWithVarArg("cow", "blue") was called
         foo.fooWithVarArg(*, *) was called
 
-
         foo.fooWithVarArg("cat")
         foo.fooWithVarArg("cat") was called
 
@@ -622,7 +621,6 @@ class IdiomaticMockitoTest extends AsyncWordSpec with Matchers with ScalatestAsy
         org.valueCaseClass(2, any[ValueCaseClass]) was called
       }
 
-
       "default answer should deal with default arguments" in {
         val aMock = foo()
 
@@ -633,7 +631,7 @@ class IdiomaticMockitoTest extends AsyncWordSpec with Matchers with ScalatestAsy
         aMock.iHaveSomeDefaultArguments("I'm gonna pass the second argument", "second argument") was called
       }
 
-      "work with by-name arguments (argument order doesn't matter when not using matchers)" in {
+      "work with by-name arguments" in {
         val aMock = foo()
 
         aMock.iStartWithByNameArgs("arg1", "arg2") shouldReturn "mocked!"
@@ -655,6 +653,22 @@ class IdiomaticMockitoTest extends AsyncWordSpec with Matchers with ScalatestAsy
 
         aMock.iHavePrimitiveByNameArgs(1, "arg2") was called
         aMock.iHavePrimitiveByNameArgs(2, "arg2") was called
+      }
+
+      "work mixed by-name, normal and vararg arguments" in {
+        val aMock = foo()
+
+        aMock.iHaveByNameAndVarArgs("arg1", "arg2", "arg3", "arg4", "vararg1", "vararg2")("arg5", "arg6", "vararg3", "vararg4") shouldReturn "mocked!"
+
+        aMock.iHaveByNameAndVarArgs("arg1", "arg2", "arg3", "arg4", "vararg1", "vararg2")("arg5", "arg6", "vararg3", "vararg4") shouldBe "mocked!"
+        aMock.iHaveByNameAndVarArgs("arg2", "arg2", "arg3", "arg4", "vararg1", "vararg2")("arg5", "arg6", "vararg3", "vararg4") should not be "mocked!"
+        aMock.iHaveByNameAndVarArgs("arg1", "arg2", "arg3", "arg4", "vararg1")("arg5", "arg6", "vararg3", "vararg4") should not be "mocked!"
+        aMock.iHaveByNameAndVarArgs("arg1", "arg2", "arg33", "arg4", "vararg1", "vararg2")("arg5", "arg6", "vararg3", "vararg4") should not be "mocked!"
+
+        aMock.iHaveByNameAndVarArgs("arg1", "arg2", "arg3", "arg4", "vararg1", "vararg2")("arg5", "arg6", "vararg3", "vararg4") was called
+        aMock.iHaveByNameAndVarArgs("arg2", "arg2", "arg3", "arg4", "vararg1", "vararg2")("arg5", "arg6", "vararg3", "vararg4") was called
+        aMock.iHaveByNameAndVarArgs("arg1", "arg2", "arg3", "arg4", "vararg1")("arg5", "arg6", "vararg3", "vararg4") was called
+        aMock.iHaveByNameAndVarArgs("arg1", "arg2", "arg33", "arg4", "vararg1", "vararg2")("arg5", "arg6", "vararg3", "vararg4") was called
       }
 
       "work with Function0 arguments" in {
@@ -688,7 +702,6 @@ class IdiomaticMockitoTest extends AsyncWordSpec with Matchers with ScalatestAsy
 
         aMock.iHavePrimitiveByNameArgs(1, "arg2") shouldBe "mocked!"
       }
-
 
       "verify things allowing a timeout" in {
         val org = orgDouble()
